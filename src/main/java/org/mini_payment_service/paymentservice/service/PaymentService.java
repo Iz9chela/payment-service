@@ -33,6 +33,11 @@ public class PaymentService {
             throw new IllegalArgumentException("Amount must be positive");
         }
 
+        payment.setPaymentId(UUID.randomUUID().toString());
+        payment.setStatus(PaymentStatus.CREATED);
+        payment.setCreatedAt(LocalDateTime.now());
+        payment.setUpdatedAt(LocalDateTime.now());
+
         logger.info("Creating payment with amount: {} {}", payment.getAmount(), payment.getCurrency());
         Payment savedPayment = paymentRepository.save(payment);
         logger.info("Payment created with ID: {}", savedPayment.getPaymentId());
@@ -56,9 +61,9 @@ public class PaymentService {
 
     }
 
-    public Payment updateStatus(String paymentId, PaymentStatus status){
+    public Payment updateStatus(String paymentId, PaymentStatus newStatus) {
 
-        logger.info("Updating payment {} to status: {}", paymentId, status);
+        logger.info("Updating payment {} to status: {}", paymentId, newStatus);
 
         UUID uuid = parseUuid(paymentId);
 
@@ -68,21 +73,66 @@ public class PaymentService {
                     return new PaymentNotFoundException(uuid);
                 });
 
-        PaymentStatus oldStatus = payment.getStatus();
+        PaymentStatus currentStatus = payment.getStatus();
 
-        if (oldStatus == PaymentStatus.COMPLETED) {
-            throw new IllegalStateException("Cannot change status of completed payment");
-        }
+        validateStatusTransition(currentStatus, newStatus);
 
-        payment.setStatus(status);
+        payment.setStatus(newStatus);
         payment.setUpdatedAt(LocalDateTime.now());
 
         Payment updatedPayment = paymentRepository.save(payment);
 
         logger.info("Payment {} status updated from {} to {}",
-                paymentId, oldStatus, status);
+                paymentId, currentStatus, newStatus);
 
         return updatedPayment;
+
+    }
+
+    public Payment updatePayment(String paymentId, Payment updatedPayment) {
+
+        logger.info("Updating Payment with ID: {}", paymentId);
+        UUID id = parseUuid(paymentId);
+
+        if (updatedPayment.getAmount() == null || updatedPayment.getAmount().signum() <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException(id));
+
+
+        if (payment.getStatus() == PaymentStatus.COMPLETED
+                || payment.getStatus() == PaymentStatus.FAILED
+                || payment.getStatus() == PaymentStatus.CANCELLED
+                || payment.getStatus() == PaymentStatus.DELETED) {
+            throw new IllegalArgumentException("Can not update payment with status " + payment.getStatus());
+        }
+
+        payment.setAmount(updatedPayment.getAmount());
+        payment.setDescription(updatedPayment.getDescription());
+        payment.setCurrency(updatedPayment.getCurrency());
+        payment.setUpdatedAt(LocalDateTime.now());
+
+
+        return paymentRepository.save(payment);
+
+    }
+
+    public Payment deletePaymentById(String paymentId) {
+
+        UUID uuid = parseUuid(paymentId);
+
+        Payment payment = paymentRepository.findById(uuid)
+                .orElseThrow(() -> new PaymentNotFoundException(uuid));
+
+        payment.setStatus(PaymentStatus.DELETED);   //TODO Soon change SOFT delete
+        payment.setUpdatedAt(LocalDateTime.now());
+
+        logger.warn("Deleting Payment with ID: {}", paymentId);
+
+        return paymentRepository.save(payment);
+
 
     }
 
@@ -91,6 +141,25 @@ public class PaymentService {
             return UUID.fromString(id);
         } catch (IllegalArgumentException e) {
             throw new InvalidPaymentIdException(id, e);
+        }
+    }
+
+    private void validateStatusTransition(PaymentStatus current, PaymentStatus target) {
+
+        switch (current) {
+            case CREATED -> {
+                if (!(target == PaymentStatus.PROCESSING || target == PaymentStatus.CANCELLED || target == PaymentStatus.DELETED)) {
+                    throw new IllegalStateException("Invalid status transition from CREATED to " + target);
+                }
+            }
+            case PROCESSING -> {
+                if (!(target == PaymentStatus.COMPLETED || target == PaymentStatus.FAILED || target == PaymentStatus.DELETED)) {
+                    throw new IllegalStateException("Invalid status transition from PROCESSING to " + target);
+                }
+            }
+            case COMPLETED, FAILED, CANCELLED, DELETED -> {
+                throw new IllegalStateException("Cannot change final payment status: " + current);
+            }
         }
     }
 
