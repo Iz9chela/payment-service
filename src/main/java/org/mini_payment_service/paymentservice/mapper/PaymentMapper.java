@@ -26,16 +26,15 @@ public class PaymentMapper {
 
         Objects.requireNonNull(payment, "Payment must not be null");
 
-        PaymentDto paymentDto = new PaymentDto();
-        paymentDto.setPaymentId(payment.getPaymentId());
-        paymentDto.setCurrency(payment.getCurrency());
-        paymentDto.setDescription(payment.getDescription());
-        paymentDto.setStatus(payment.getStatus());
-        paymentDto.setAmount(payment.getAmount());
-        paymentDto.setCreatedAt(payment.getCreatedAt());
-        paymentDto.setUpdatedAt(payment.getUpdatedAt());
-
-        return paymentDto;
+        return new PaymentDto(
+                payment.getPaymentId(),
+                payment.getAmount(),
+                payment.getCurrency(),
+                payment.getDescription(),
+                payment.getStatus(),
+                payment.getCreatedAt(),
+                payment.getUpdatedAt()
+        );
 
 
     }

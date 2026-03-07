@@ -7,7 +7,6 @@ import org.mini_payment_service.paymentservice.mapper.PaymentMapper;
 import org.mini_payment_service.paymentservice.model.Payment;
 import org.mini_payment_service.paymentservice.dto.PaymentRequest;
 import org.mini_payment_service.paymentservice.dto.PaymentResponse;
-import org.mini_payment_service.paymentservice.model.PaymentStatus;
 import org.mini_payment_service.paymentservice.service.PaymentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +71,18 @@ public class PaymentController {
         return ResponseEntity.ok(paymentDtoList);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PaymentDto> updatePayment(@PathVariable("id") String paymentId, @Valid @RequestBody PaymentRequest request) {
+        logger.info("Received request to update payment with ID: {}", paymentId);
+
+        Payment payment = paymentMapper.toEntity(request);
+        Payment updatedPayment = paymentService.updatePayment(paymentId, payment);
+        PaymentDto dto = paymentMapper.toDto(updatedPayment);
+        logger.info("Payment updated successfully with ID: {}", paymentId);
+        return ResponseEntity.ok(dto);
+
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<PaymentDto> updateStatus(
             @PathVariable("id") String paymentId,
@@ -87,6 +98,20 @@ public class PaymentController {
                 paymentId, request.getStatus());
 
         return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<PaymentResponse> deletePayment(@PathVariable("id") String paymentId) {
+
+        logger.info("Received delete request to delete payment with ID: {}", paymentId);
+
+        Payment deleted = paymentService.deletePaymentById(paymentId);
+
+        return ResponseEntity.ok(
+                new PaymentResponse(deleted.getPaymentId(), deleted.getStatus())
+        );
+
+
     }
 
 

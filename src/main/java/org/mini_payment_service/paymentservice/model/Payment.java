@@ -2,7 +2,6 @@ package org.mini_payment_service.paymentservice.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 
 public class Payment {
@@ -16,11 +15,6 @@ public class Payment {
     private LocalDateTime updatedAt;
 
     public Payment() {
-
-        this.paymentId = UUID.randomUUID().toString();
-        this.status = PaymentStatus.CREATED;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
 
     }
 
@@ -90,7 +84,7 @@ public class Payment {
 
     @Override
     public String toString() {
-        return "PaymentDTO{" +
+        return "Payment{" +
                 "id='" + paymentId + '\'' +
                 ", amount=" + amount +
                 ", currency='" + currency + '\'' +
