@@ -1,17 +1,40 @@
 package org.mini_payment_service.paymentservice.model;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-
+@Entity
+@Table(name = "payments")
 public class Payment {
 
-    private String paymentId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "payment_id", updatable = false, nullable = false)
+    private UUID id;
+
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal amount;
+
+    @Column(nullable = false, length = 3)
     private String currency;
+
+    @Column(nullable = false)
     private String description;
-    private PaymentStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus status = PaymentStatus.CREATED;
+
+    @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     public Payment() {
@@ -26,12 +49,12 @@ public class Payment {
 
     }
 
-    public String getPaymentId() {
-        return paymentId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public BigDecimal getAmount() {
@@ -85,7 +108,7 @@ public class Payment {
     @Override
     public String toString() {
         return "Payment{" +
-                "id='" + paymentId + '\'' +
+                "id='" + id + '\'' +
                 ", amount=" + amount +
                 ", currency='" + currency + '\'' +
                 ", description='" + description + '\'' +

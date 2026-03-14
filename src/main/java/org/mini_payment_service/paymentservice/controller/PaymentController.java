@@ -41,7 +41,7 @@ public class PaymentController {
         Payment createdPayment = paymentService.createPayment(payment);
         PaymentResponse response = paymentMapper.toResponse(createdPayment);
 
-        logger.info("Payment created successfully with ID: {}", response.getPaymentId());
+        logger.info("Payment created successfully with ID: {}", response.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -108,7 +108,7 @@ public class PaymentController {
         Payment deleted = paymentService.deletePaymentById(paymentId);
 
         return ResponseEntity.ok(
-                new PaymentResponse(deleted.getPaymentId(), deleted.getStatus())
+                new PaymentResponse(deleted.getId(), deleted.getStatus())
         );
 
 

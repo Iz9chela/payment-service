@@ -1,0 +1,23 @@
+# Compiled files
+target/
+
+# Git History
+.git/
+.gitignore
+
+# IDE files
+.idea/
+*.iml
+
+# CI configs inside image
+.github/
+
+# Documentation
+*.md
+
+# Docker files
+Dockerfile
+docker-compose.yml
+
+#Enviroment files
+.env

@@ -27,7 +27,7 @@ public class PaymentMapper {
         Objects.requireNonNull(payment, "Payment must not be null");
 
         return new PaymentDto(
-                payment.getPaymentId(),
+                payment.getId(),
                 payment.getAmount(),
                 payment.getCurrency(),
                 payment.getDescription(),
@@ -44,9 +44,10 @@ public class PaymentMapper {
             return null;
         }
 
-        PaymentResponse paymentResponse = new PaymentResponse(payment.getPaymentId(), payment.getStatus());
-
-        return paymentResponse;
+        return new PaymentResponse(
+                payment.getId(),
+                payment.getStatus()
+        );
     }
 
 }
