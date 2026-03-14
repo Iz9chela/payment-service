@@ -4,10 +4,11 @@ import org.mini_payment_service.paymentservice.model.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class PaymentDto {
 
-    private String paymentId;
+    private UUID id;
     private BigDecimal amount;
     private String currency;
     private String description;
@@ -15,8 +16,8 @@ public class PaymentDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public PaymentDto(String paymentId, BigDecimal amount, String currency, String description, PaymentStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.paymentId = paymentId;
+    public PaymentDto(UUID id, BigDecimal amount, String currency, String description, PaymentStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
         this.amount = amount;
         this.currency = currency;
         this.description = description;
@@ -29,12 +30,12 @@ public class PaymentDto {
 
     }
 
-    public String getPaymentId() {
-        return paymentId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public BigDecimal getAmount() {

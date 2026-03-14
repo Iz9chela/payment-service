@@ -1,21 +1,23 @@
 package org.mini_payment_service.paymentservice.repository;
 
 import org.mini_payment_service.paymentservice.model.Payment;
+import org.mini_payment_service.paymentservice.model.PaymentStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PaymentRepository {
+public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
-    Payment save(Payment payment);
+    List<Payment> findByStatus(PaymentStatus status);
+    List<Payment> findByCurrencyAndStatus(String currency, PaymentStatus status);
+    Optional<Payment> findByIdAndStatus(UUID id, PaymentStatus status);
 
-    Optional<Payment> findById(UUID paymentId);
-
-    boolean existsById(UUID paymentId);
-
-    List<Payment> findAll();
-
-    void deleteById(UUID paymentId);
+    @Query("SELECT p FROM Payment p WHERE p.amount > :minAmount")
+    List<Payment> findByAmountGreaterThan(@Param("minAmount") BigDecimal minAmount);
 
 }

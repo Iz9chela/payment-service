@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -26,25 +27,21 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
     }
 
-
+    @Transactional
     public Payment createPayment(Payment payment) {
 
         if (payment.getAmount() == null || payment.getAmount().signum() <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }
 
-        payment.setPaymentId(UUID.randomUUID().toString());
-        payment.setStatus(PaymentStatus.CREATED);
-        payment.setCreatedAt(LocalDateTime.now());
-        payment.setUpdatedAt(LocalDateTime.now());
-
         logger.info("Creating payment with amount: {} {}", payment.getAmount(), payment.getCurrency());
         Payment savedPayment = paymentRepository.save(payment);
-        logger.info("Payment created with ID: {}", savedPayment.getPaymentId());
+        logger.info("Payment created with ID: {}", savedPayment.getId());
         return savedPayment;
 
     }
 
+    @Transactional(readOnly = true)
     public Payment getPaymentById(String paymentId) {
 
         logger.debug("Retrieving Payment with ID: {}", paymentId);
@@ -54,13 +51,14 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentNotFoundException(id));
     }
 
-
+    @Transactional(readOnly = true)
     public List<Payment> getAllPayments() {
 
         return paymentRepository.findAll();
 
     }
 
+    @Transactional
     public Payment updateStatus(String paymentId, PaymentStatus newStatus) {
 
         logger.info("Updating payment {} to status: {}", paymentId, newStatus);
@@ -78,7 +76,6 @@ public class PaymentService {
         validateStatusTransition(currentStatus, newStatus);
 
         payment.setStatus(newStatus);
-        payment.setUpdatedAt(LocalDateTime.now());
 
         Payment updatedPayment = paymentRepository.save(payment);
 
@@ -89,6 +86,7 @@ public class PaymentService {
 
     }
 
+    @Transactional
     public Payment updatePayment(String paymentId, Payment updatedPayment) {
 
         logger.info("Updating Payment with ID: {}", paymentId);
@@ -112,13 +110,13 @@ public class PaymentService {
         payment.setAmount(updatedPayment.getAmount());
         payment.setDescription(updatedPayment.getDescription());
         payment.setCurrency(updatedPayment.getCurrency());
-        payment.setUpdatedAt(LocalDateTime.now());
 
 
         return paymentRepository.save(payment);
 
     }
 
+    @Transactional
     public Payment deletePaymentById(String paymentId) {
 
         UUID uuid = parseUuid(paymentId);
@@ -126,8 +124,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(uuid)
                 .orElseThrow(() -> new PaymentNotFoundException(uuid));
 
-        payment.setStatus(PaymentStatus.DELETED);   //TODO Soon change SOFT delete
-        payment.setUpdatedAt(LocalDateTime.now());
+        payment.setStatus(PaymentStatus.DELETED);
 
         logger.warn("Deleting Payment with ID: {}", paymentId);
 

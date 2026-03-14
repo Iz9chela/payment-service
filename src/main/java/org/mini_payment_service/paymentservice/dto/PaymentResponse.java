@@ -2,26 +2,28 @@ package org.mini_payment_service.paymentservice.dto;
 
 import org.mini_payment_service.paymentservice.model.PaymentStatus;
 
+import java.util.UUID;
+
 public class PaymentResponse {
 
-    private String paymentId;
+    private UUID id;
     private PaymentStatus status;
 
 
     public PaymentResponse() {
     }
 
-    public PaymentResponse(String paymentId, PaymentStatus status) {
-        this.paymentId = paymentId;
+    public PaymentResponse(UUID id, PaymentStatus status) {
+        this.id = id;
         this.status = status;
     }
 
-    public String getPaymentId() {
-        return paymentId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public PaymentStatus getStatus() {
